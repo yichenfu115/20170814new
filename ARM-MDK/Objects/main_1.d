@@ -1,0 +1,9 @@
+.\objects\main_1.o: ..\src\main.c
+.\objects\main_1.o: ..\inc\main.h
+.\objects\main_1.o: ..\CMSIS\Device\ST\STM32F0xx\Include\stm32f0xx.h
+.\objects\main_1.o: ..\CMSIS\Include\core_cm0.h
+.\objects\main_1.o: E:\armkeil\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\main_1.o: ..\CMSIS\Include\core_cmInstr.h
+.\objects\main_1.o: ..\CMSIS\Include\core_cmFunc.h
+.\objects\main_1.o: ..\CMSIS\Device\ST\STM32F0xx\Include\system_stm32f0xx.h
+.\objects\main_1.o: ..\inc\stm32f0xx_conf.h
