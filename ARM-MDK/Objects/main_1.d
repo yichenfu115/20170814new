@@ -7,3 +7,6 @@
 .\objects\main_1.o: ..\CMSIS\Include\core_cmFunc.h
 .\objects\main_1.o: ..\CMSIS\Device\ST\STM32F0xx\Include\system_stm32f0xx.h
 .\objects\main_1.o: ..\inc\stm32f0xx_conf.h
+.\objects\main_1.o: ..\lib\inc\stm32f0xx_gpio.h
+.\objects\main_1.o: ..\CMSIS\Device\ST\STM32F0xx\Include\stm32f0xx.h
+.\objects\main_1.o: ..\lib\inc\stm32f0xx_rcc.h

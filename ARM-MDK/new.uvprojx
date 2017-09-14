@@ -409,6 +409,18 @@
         </Group>
         <Group>
           <GroupName>lib</GroupName>
+          <Files>
+            <File>
+              <FileName>stm32f0xx_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\lib\src\stm32f0xx_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f0xx_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\lib\src\stm32f0xx_rcc.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>CMSIS</GroupName>
