@@ -10,3 +10,4 @@
 .\objects\stm32f0xx_gpio.o: ..\lib\inc\stm32f0xx_gpio.h
 .\objects\stm32f0xx_gpio.o: ..\lib\inc\stm32f0xx_rcc.h
 .\objects\stm32f0xx_gpio.o: ..\CMSIS\Device\ST\STM32F0xx\Include\stm32f0xx.h
+.\objects\stm32f0xx_gpio.o: ..\lib\inc\stm32f0xx_adc.h

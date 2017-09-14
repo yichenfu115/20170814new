@@ -420,6 +420,11 @@
               <FileType>1</FileType>
               <FilePath>..\lib\src\stm32f0xx_rcc.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f0xx_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\lib\src\stm32f0xx_adc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

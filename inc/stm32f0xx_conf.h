@@ -3,6 +3,7 @@
 #define __STM32F0XX_CONF_H
 #include "stm32f0xx_gpio.h"
 #include "stm32f0xx_rcc.h"
+#include "stm32f0xx_adc.h"
 #ifdef  USE_FULL_ASSERT
 
   #define assert_param(expr) ((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))
