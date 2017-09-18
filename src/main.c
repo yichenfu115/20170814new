@@ -1,44 +1,52 @@
 //STM32F030_NUCLEO
 #include "main.h"
 
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+
+USART_TypeDef* COM_USART[COMn] = {EVAL_COM1}; 
+GPIO_TypeDef* COM_TX_PORT[COMn] = {EVAL_COM1_TX_GPIO_PORT};
+GPIO_TypeDef* COM_RX_PORT[COMn] = {EVAL_COM1_RX_GPIO_PORT};
+const uint32_t COM_USART_CLK[COMn] = {EVAL_COM1_CLK};
+const uint32_t COM_TX_PORT_CLK[COMn] = {EVAL_COM1_TX_GPIO_CLK};
+const uint32_t COM_RX_PORT_CLK[COMn] = {EVAL_COM1_RX_GPIO_CLK};
+const uint8_t COM_TX_PIN_SOURCE[COMn] = {EVAL_COM1_TX_SOURCE};
+const uint8_t COM_RX_PIN_SOURCE[COMn] = {EVAL_COM1_RX_SOURCE};
+const uint8_t COM_TX_AF[COMn] = {EVAL_COM1_TX_AF};
+const uint8_t COM_RX_AF[COMn] = {EVAL_COM1_RX_AF};
+const uint16_t COM_TX_PIN[COMn] = {EVAL_COM1_TX_PIN};
+const uint16_t COM_RX_PIN[COMn] = {EVAL_COM1_RX_PIN};
+
+uint8_t aTxBuffer[BUFFER_SIZE] = "USART Example: 8xUsarts Tx/Rx Communication";
+uint8_t aRxBuffer[USART_MAX_INDEX][BUFFER_SIZE];
+uint8_t UsartIndex = 0;
+__IO uint8_t TxCounter = 0;
+extern __IO uint8_t ReceiveState;
+
+
+static void NVIC_Configuration(void);
 static void LED_GPIO_Configuration(void);
-static void ADC_Config(void);
-void Delay(__IO uint32_t nTime);
-static __IO int32_t TimingDelay;
-extern __IO  uint8_t Stepping = 0;
-__IO uint16_t  ADC1ConvertedValue = 0, ADC1ConvertedVoltage = 0;
-uint32_t PC1v = 0, PC1mv = 0;
+static void USART_Config(void);
+
 
 int main(void)
-{
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+{  
+
   LED_GPIO_Configuration();
- 	ADC_Config();
-	if (SysTick_Config(SystemCoreClock / 1000))
-  { 
-  while(1);
-  }
-  while(1)
- {
-   while (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
-		ADC1ConvertedValue = ADC_GetConversionValue(ADC1);
+  USART_Config(); 
+  NVIC_Configuration();
+//  USART_ITConfig(COM1, USART_IT_RXNE, ENABLE);
+    /* Enable the 8xUSARTs */
+      
+  USART_SendData(USART2, 'B');
 
-		/* Compute the voltage */
-		ADC1ConvertedVoltage = (ADC1ConvertedValue * 3300) / 0xFFF;
-		PC1v = (ADC1ConvertedVoltage) / 1000;
-		PC1mv = (ADC1ConvertedVoltage % 1000) / 100;
-   if(PC1v>1)
-   {
-   GPIO_SetBits(GPIOA,GPIO_Pin_5);
-   Delay(30);
-   GPIO_ResetBits(GPIOA,GPIO_Pin_5);
- 	 Delay(30);
-   }
-   else   GPIO_SetBits(GPIOA,GPIO_Pin_5);
+  GPIO_SetBits(GPIOA,GPIO_Pin_5);
 
- }
+  printf("USAnction to the USART\n\r");
+	while(1)
+	{
+	}
+	return 0;
 }
-  
 static void LED_GPIO_Configuration(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure; 	
@@ -51,62 +59,80 @@ static void LED_GPIO_Configuration(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
-void Delay(__IO uint32_t nTime)
+static void USART_Config(void)
 { 
-  TimingDelay = nTime; 
-  while(TimingDelay != 0);
+  USART_InitTypeDef USART_InitStructure;
+
+  USART_InitStructure.USART_BaudRate = 115200;
+  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+  USART_InitStructure.USART_StopBits = USART_StopBits_1;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
+  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  STM_EVAL_COMInit(COM1, &USART_InitStructure);
+  
+  
 }
-void TimingDelay_Decrement(void)
+static void NVIC_Configuration(void)
 {
-  if (TimingDelay != 0x00)
-  { 
-    TimingDelay--;
-  }
+  NVIC_InitTypeDef NVIC_InitStructure;
+  
+  /* USART1 IRQ Channel configuration */
+  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  
+  /* USART2 IRQ Channel configuration */
+  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPriority = 0x01;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
 }
-static void ADC_Config(void)
+PUTCHAR_PROTOTYPE
 {
-  GPIO_InitTypeDef GPIO_InitStructure; 	
-  ADC_InitTypeDef     ADC_InitStructure;
-
-	/* GPIOC Periph clock enable */
-	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
-
-	/* ADC1 Periph clock enable */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-
-	/* Configure ADC Channel11 as analog input */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-	/* ADCs DeInit */
-	ADC_DeInit(ADC1);
-
-	/* Initialize ADC structure */
-	ADC_StructInit(&ADC_InitStructure);
-
-	/* Configure the ADC1 in continuous mode with a resolution equal to 12 bits  */
-	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
-	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_ScanDirection = ADC_ScanDirection_Upward;
-	ADC_Init(ADC1, &ADC_InitStructure);
-
-	/* Convert the ADC1 Channel 11 with 239.5 Cycles as sampling time */
-	ADC_ChannelConfig(ADC1, ADC_Channel_11, ADC_SampleTime_239_5Cycles);
-
-	/* ADC Calibration */
-	ADC_GetCalibrationFactor(ADC1);
-
-	/* Enable the ADC peripheral */
-	ADC_Cmd(ADC1, ENABLE);
-
-	/* Wait the ADRDY flag */
-	while (!ADC_GetFlagStatus(ADC1, ADC_FLAG_ADRDY));
-
-	/* ADC1 regular Software Start Conv */
-	ADC_StartOfConversion(ADC1);
-
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART */
+  USART_SendData(EVAL_COM1, (uint8_t) ch);
+  /* Loop until transmit data register is empty */
+  while (USART_GetFlagStatus(EVAL_COM1, USART_FLAG_TXE) == RESET)
+  {}
+  return ch;
 }
+void STM_EVAL_COMInit(COM_TypeDef COM, USART_InitTypeDef* USART_InitStruct)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  /* Enable GPIO clock */
+  RCC_AHBPeriphClockCmd(COM_TX_PORT_CLK[COM] | COM_RX_PORT_CLK[COM], ENABLE);
+
+  /* Enable USART clock */
+  RCC_APB1PeriphClockCmd(COM_USART_CLK[COM], ENABLE); 
+
+  /* Connect PXx to USARTx_Tx */
+  GPIO_PinAFConfig(COM_TX_PORT[COM], COM_TX_PIN_SOURCE[COM], COM_TX_AF[COM]);
+
+  /* Connect PXx to USARTx_Rx */
+  GPIO_PinAFConfig(COM_RX_PORT[COM], COM_RX_PIN_SOURCE[COM], COM_RX_AF[COM]);
+  
+  /* Configure USART Tx as alternate function push-pull */
+  GPIO_InitStructure.GPIO_Pin = COM_TX_PIN[COM];
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+  GPIO_Init(COM_TX_PORT[COM], &GPIO_InitStructure);
+    
+  /* Configure USART Rx as alternate function push-pull */
+  GPIO_InitStructure.GPIO_Pin = COM_RX_PIN[COM];
+  GPIO_Init(COM_RX_PORT[COM], &GPIO_InitStructure);
+
+  /* USART configuration */
+  USART_Init(COM_USART[COM], USART_InitStruct);
+  USART_ITConfig(EVAL_COM1, USART_IT_RXNE, ENABLE);
+
+  /* Enable USART */
+  USART_Cmd(COM_USART[COM], ENABLE);
+}
+
